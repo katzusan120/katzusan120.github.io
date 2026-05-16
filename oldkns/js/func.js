@@ -80,4 +80,3 @@ Func.showCat = function(code, rost, wh, dey, vundo, clean, vesto, veneno, swim) 
 Func.toCat = function(id) {
 	$("#" + id).html(Func.showCat.apply(this, $("#" + id).text().split(",")));
 };
-}

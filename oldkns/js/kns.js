@@ -130,7 +130,7 @@ $(function() {
 				$("#cat").html(Func.showCat($("#cat").text())).show();
 			}); */
 		}
-	});
+	);
 	
 	var main = new Array(Kns.info.length);
 	main[0] = 1;
@@ -235,4 +235,5 @@ $(function() {
 		$(".edit0").click();
 	});
 	
-	Kns.start();
+	Kns.start()
+});
