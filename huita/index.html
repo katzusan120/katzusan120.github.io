@@ -7,12 +7,10 @@
 </head>
 <body>
     <h1>Сканер ссылок кэквар.сунет!!!</h1>
-    <p><i>(Рекомендую включить впн иначе админы найдут вас и будут вычислять ваш адрес по отключениям света)</i></p>
+    <p><i>(Рекомендую включить впн иначе админы найдут вас и будут вычислять ваш адрес по отключениям света!)</i></p>
 
     <fieldset>
-        <legend>Настройки сканирования</legend> <!-- смотрите шо я недавно нашел ляпота не правда ли -->
-        
-        <label>Домен:</label>
+        <legend>Настройки сканирования</legend> <label>Домен:</label>
         <input type="text" id="domainInput" value="catwar.su"><br><br>
 
         <label>Задержка (в мс):</label>
@@ -47,8 +45,7 @@
     <h2>Результаты:</h2>
     <p>Проверено: <span id="checked">0</span> | Найдено: <span id="found">0</span></p>
     <hr>
-    <div id="resultsContainer">
-        </div>
+    <div id="resultsContainer"></div>
 
     <script>
         let isScanning = false;
@@ -167,23 +164,22 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlText, 'text/html');
 
-                    let catName = doc.querySelector('big')?.innerText;
+                    let catName = doc.querySelector('big')?.innerText || 'Имя не найдено';
                     
                     const fullAvatarUrl = `https://${domain}/avatar/${id}.jpg`;
                     let avatarBlobUrl = '';
 
-                        // НАДЕЮСЬ ТОТ КТО ЗАПРЕТИЛ ХОТЛИНКИНГ ДОВОЛЕН СОБОЮ!!!))))))
-                        try {
-                            const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
-                               if (imgResp.ok) {
-                                   const imgBlob = await imgResp.blob();
-                                   if (imgBlob.type.startsWith('image/')) {
-                                   avatarBlobUrl = URL.createObjectURL(imgBlob);
-                                }
+                    // НАДЕЮСЬ ТОТ КТО ЗАПРЕТИЛ ХОТЛИНКИНГ ДОВОЛЕН СОБОЮ!!!))))))
+                    try {
+                        const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
+                        if (imgResp.ok) {
+                            const imgBlob = await imgResp.blob();
+                            if (imgBlob.type.startsWith('image/')) {
+                                avatarBlobUrl = URL.createObjectURL(imgBlob);
                             }
-                        } catch (imgErr) {
-                            console.error(`Не удалось загрузить аватарку для ID ${id}:`, imgErr);
                         }
+                    } catch (imgErr) {
+                        console.error(`Не удалось загрузить аватарку для ID ${id}:`, imgErr);
                     }
 
                     // по колхозянски ищем табличку где все данные
@@ -204,7 +200,7 @@
                                     if (icon.id === 'id_icon') label = 'ID';
                                     else if (icon.id === 'age_icon') label = 'Возраст';
                                     else if (icon.id === 'act_icon') label = 'Активность';
-                                    else label = 'Параметр'; //блять а схуяли у племени и бу нет айдишек
+                                    else label = 'Параметр';
                                 }
                                 statsHtml += `<li><b>${label}:</b> ${valueObj.innerText.trim()}</li>`;
                             }
@@ -217,7 +213,7 @@
                     const resultHtml = `
                         <div>
                             <b>Имя: ${catName}</b><br>
-                            ${avatarSrc ? `<a href="${targetUrl}" target="_blank"><img src="${avatarBlobUrl}" width="100" alt="Аватар"></a><br>` : ''}
+                            ${avatarBlobUrl ? `<a href="${targetUrl}" target="_blank"><img src="${avatarBlobUrl}" width="100" alt="Аватар"></a><br>` : ''}
                             <a href="${targetUrl}" target="_blank">Ссылка на профиль</a><br>
                             ${statsHtml}
                         </div>
