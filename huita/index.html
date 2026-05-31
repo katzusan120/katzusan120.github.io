@@ -168,16 +168,25 @@
 
                     let catName = doc.querySelector('big')?.innerText;
                     
-                    let avatarSrc = doc.querySelector('img.avatar')?.getAttribute('src') || '';
-                    let avatarImg = '';
-                    
+                    // надеюсь тот кто запретил хотлинкинг доволен сука
                     if (avatarSrc) {
+                        let fullAvatarUrl = '';
                         if (avatarSrc.startsWith('/')) {
-                            avatarImg = `https://${domain}${avatarSrc}`;
+                            fullAvatarUrl = `https://${domain}${avatarSrc}`;
                         } else if (!avatarSrc.startsWith('http')) {
-                            avatarImg = `https://${domain}/${avatarSrc}`;
+                            fullAvatarUrl = `https://${domain}/${avatarSrc}`;
                         } else {
-                            avatarImg = avatarSrc;
+                            fullAvatarUrl = avatarSrc;
+                        }
+
+                        try {
+                            const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
+                            if (imgResp.ok) {
+                                const imgBlob = await imgResp.blob();
+                                avatarBlobUrl = URL.createObjectURL(imgBlob);
+                            }
+                        } catch (imgErr) {
+                            console.error(`Какие то мутки с аватаркой ID ${id}:`, imgErr);
                         }
                     }
 
