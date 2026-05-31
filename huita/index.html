@@ -173,7 +173,7 @@
                     let avatarBlobUrl = '';
                     
                     if (avatarSrc) {
-                        // подумал щакурил заплакал
+                        // подумал щакурил заплакал но чтоб наверняка...
                         if (avatarSrc.includes('/avatar/')) {
                             avatarSrc = '/avatar/' + avatarSrc.split('/avatar/')[1];
                         } else if (avatarSrc.includes('img/')) {
@@ -230,7 +230,7 @@
                     const resultHtml = `
                         <div>
                             <b>Имя: ${catName}</b><br>
-                            ${avatarSrc ? `<a href="${targetUrl}" target="_blank"><img src="${avatarSrc}" width="100" alt="Аватар"></a><br>` : ''}
+                            ${avatarSrc ? `<a href="${targetUrl}" target="_blank"><img src="https://${domain}${avatarSrc}" width="100" alt="Аватар"></a><br>` : ''}
                             <a href="${targetUrl}" target="_blank">Ссылка на профиль</a><br>
                             ${statsHtml}
                         </div>
