@@ -171,23 +171,18 @@
                     let imgEl = doc.querySelector('img.avatar');
                     let avatarSrc = imgEl ? imgEl.getAttribute('src') : '';
                     let avatarBlobUrl = '';
+
+                    const avatarMatch = htmlText.match(/<img[^>]+src=["']([^"']+)["'][^>]+class=["']avatar["']/i) 
+                                     || htmlText.match(/<img[^>]+class=["']avatar["'][^>]+src=["']([^"']+)["']/i);
                     
-                    if (avatarSrc) {
-                        // подумал щакурил заплакал но чтоб наверняка...
-                        if (avatarSrc.includes('/avatar/')) {
-                            avatarSrc = '/avatar/' + avatarSrc.split('/avatar/')[1];
-                        } else if (avatarSrc.includes('img/')) {
-                            avatarSrc = 'img/' + avatarSrc.split('img/')[1];
+                    if (avatarMatch) {
+                        let rawSrc = avatarMatch[1];
+                        if (rawSrc.includes('/avatar/')) {
+                            rawSrc = '/avatar/' + rawSrc.split('/avatar/')[1];
                         }
-
-                        let fullAvatarUrl = '';
-                        if (avatarSrc.startsWith('/')) {
-                            fullAvatarUrl = `https://${domain}${avatarSrc}`;
-                        } else {
-                            fullAvatarUrl = `https://${domain}/${avatarSrc}`;
-                        }
-
-                        // надеюсь тот кто запретил хотлинкинг доволен чобой сука!)
+                        const fullAvatarUrl = `https://${domain}${rawSrc.startsWith('/') ? '' : '/'}${rawSrc}`;
+                        
+                        // НАДЕЮСЬ ТОТ КТО ЗАПРЕТИЛ ХОТЛИНКИНГ ДОВОЛЕН СОБОЮ!!!))))))
                         try {
                             const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
                             if (imgResp.ok) {
@@ -195,7 +190,7 @@
                                 avatarBlobUrl = URL.createObjectURL(imgBlob);
                             }
                         } catch (imgErr) {
-                            console.error(`Какие то мутки с аватаркой ID ${id}:`, imgErr);
+                            console.error(`Не удалось проксировать аватарку для ID ${id}:`, imgErr);
                         }
                     }
 
@@ -230,7 +225,7 @@
                     const resultHtml = `
                         <div>
                             <b>Имя: ${catName}</b><br>
-                            ${avatarSrc ? `<a href="${targetUrl}" target="_blank"><img src="https://${domain}${avatarSrc}" width="100" alt="Аватар"></a><br>` : ''}
+                            ${avatarSrc ? `<a href="${targetUrl}" target="_blank"><img src="${avatarSrc}" width="100" alt="Аватар"></a><br>` : ''}
                             <a href="${targetUrl}" target="_blank">Ссылка на профиль</a><br>
                             ${statsHtml}
                         </div>
