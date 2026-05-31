@@ -168,20 +168,26 @@
 
                     let catName = doc.querySelector('big')?.innerText;
                     
-                    // надеюсь тот кто запретил хотлинкинг доволен сука
-		            let avatarImg = doc.querySelector('img.avatar')?.getAttribute('src') || '';
+                    let imgEl = doc.querySelector('img.avatar');
+                    let avatarSrc = imgEl ? imgEl.getAttribute('src') : '';
                     let avatarBlobUrl = '';
-
-                    if (avatarImg) {
-                        let fullAvatarUrl = '';
-                        if (avatarImg.startsWith('/')) {
-                            fullAvatarUrl = `https://${domain}${avatarImg}`;
-                        } else if (!avatarImg.startsWith('http')) {
-                            fullAvatarUrl = `https://${domain}/${avatarImg}`;
-                        } else {
-                            fullAvatarUrl = avatarImg;
+                    
+                    if (avatarSrc) {
+                        // подумал щакурил заплакал
+                        if (avatarSrc.includes('/avatar/')) {
+                            avatarSrc = '/avatar/' + avatarSrc.split('/avatar/')[1];
+                        } else if (avatarSrc.includes('img/')) {
+                            avatarSrc = 'img/' + avatarSrc.split('img/')[1];
                         }
 
+                        let fullAvatarUrl = '';
+                        if (avatarSrc.startsWith('/')) {
+                            fullAvatarUrl = `https://${domain}${avatarSrc}`;
+                        } else {
+                            fullAvatarUrl = `https://${domain}/${avatarSrc}`;
+                        }
+
+                        // надеюсь тот кто запретил хотлинкинг доволен чобой сука!)
                         try {
                             const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
                             if (imgResp.ok) {
