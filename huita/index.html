@@ -166,20 +166,26 @@
 
                     let catName = doc.querySelector('big')?.innerText || 'Имя не найдено';
                     
-                    const fullAvatarUrl = `https://${domain}/avatar/${id}.jpg`;
-                    let avatarBlobUrl = '';
 
                     // НАДЕЮСЬ ТОТ КТО ЗАПРЕТИЛ ХОТЛИНКИНГ ДОВОЛЕН СОБОЮ!!!))))))
-                    try {
-                        const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
-                        if (imgResp.ok) {
-                            const imgBlob = await imgResp.blob();
-                            if (imgBlob.type.startsWith('image/')) {
-                                avatarBlobUrl = URL.createObjectURL(imgBlob);
+                    const avatarImgElement = doc.querySelector('img[src*="/avatar/"]');
+                    let avatarBlobUrl = '';
+
+                    if (avatarImgElement) {
+                        const relativeAvatarUrl = avatarImgElement.getAttribute('src');
+                        const fullAvatarUrl = relativeAvatarUrl.startsWith('http') ? relativeAvatarUrl : `https://${domain}${relativeAvatarUrl}`;
+
+                        try {
+                            const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
+                            if (imgResp.ok) {
+                                const imgBlob = await imgResp.blob();
+                                if (imgBlob.type.startsWith('image/')) {
+                                    avatarBlobUrl = URL.createObjectURL(imgBlob);
+                                }
                             }
+                        } catch (imgErr) {
+                            console.error(`Не удалось загрузить аватарку для ID ${id}:`, imgErr);
                         }
-                    } catch (imgErr) {
-                        console.error(`Не удалось загрузить аватарку для ID ${id}:`, imgErr);
                     }
 
                     // по колхозянски ищем табличку где все данные
@@ -213,7 +219,7 @@
                     const resultHtml = `
                         <div>
                             <b>Имя: ${catName}</b><br>
-                            ${avatarBlobUrl ? `<a href="${targetUrl}" target="_blank"><img src="${avatarBlobUrl}" width="100" alt="Аватар"></a><br>` : ''}
+                            ${avatarBlobUrl ? `<a href="${targetUrl}" target="_blank"><img src="${avatarBlobUrl}" width="100" alt="Аватар"></a><br>` : 'а где аватарка'}
                             <a href="${targetUrl}" target="_blank">Ссылка на профиль</a><br>
                             ${statsHtml}
                         </div>
