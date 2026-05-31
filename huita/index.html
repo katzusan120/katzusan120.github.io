@@ -169,6 +169,9 @@
                     let catName = doc.querySelector('big')?.innerText;
                     
                     // надеюсь тот кто запретил хотлинкинг доволен сука
+		    let avatarSrc = doc.querySelector('img.avatar')?.getAttribute('src') || '';
+                    let avatarBlobUrl = '';
+
                     if (avatarSrc) {
                         let fullAvatarUrl = '';
                         if (avatarSrc.startsWith('/')) {
