@@ -169,17 +169,17 @@
                     let catName = doc.querySelector('big')?.innerText;
                     
                     // надеюсь тот кто запретил хотлинкинг доволен сука
-		    let avatarSrc = doc.querySelector('img.avatar')?.getAttribute('src') || '';
+		            let avatarImg = doc.querySelector('img.avatar')?.getAttribute('src') || '';
                     let avatarBlobUrl = '';
 
-                    if (avatarSrc) {
+                    if (avatarImg) {
                         let fullAvatarUrl = '';
-                        if (avatarSrc.startsWith('/')) {
-                            fullAvatarUrl = `https://${domain}${avatarSrc}`;
-                        } else if (!avatarSrc.startsWith('http')) {
-                            fullAvatarUrl = `https://${domain}/${avatarSrc}`;
+                        if (avatarImg.startsWith('/')) {
+                            fullAvatarUrl = `https://${domain}${avatarImg}`;
+                        } else if (!avatarImg.startsWith('http')) {
+                            fullAvatarUrl = `https://${domain}/${avatarImg}`;
                         } else {
-                            fullAvatarUrl = avatarSrc;
+                            fullAvatarUrl = avatarImg;
                         }
 
                         try {
