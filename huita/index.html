@@ -171,14 +171,7 @@
                     
                     const fullAvatarUrl = `https://${domain}/avatar/${id}.jpg`;
                     let avatarBlobUrl = '';
-                    
-                    if (avatarMatch) {
-                        let rawSrc = avatarMatch[1];
-                        if (rawSrc.includes('/avatar/')) {
-                            rawSrc = '/avatar/' + rawSrc.split('/avatar/')[1];
-                        }
-                        const fullAvatarUrl = `https://${domain}${rawSrc.startsWith('/') ? '' : '/'}${rawSrc}`;
-                        
+
                         // НАДЕЮСЬ ТОТ КТО ЗАПРЕТИЛ ХОТЛИНКИНГ ДОВОЛЕН СОБОЮ!!!))))))
                         try {
                             const imgResp = await fetch(CORS_PROXY + encodeURIComponent(fullAvatarUrl));
@@ -189,7 +182,7 @@
                                 }
                             }
                         } catch (imgErr) {
-                            console.error(`Не удалось проксировать аватарку для ID ${id}:`, imgErr);
+                            console.error(`Не удалось загрузить аватарку для ID ${id}:`, imgErr);
                         }
                     }
 
