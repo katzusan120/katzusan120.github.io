@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ВЗЛОМ ЖОПЫ</title>
+</head>
+<body>
+    <h1>Сканер ссылок кэквар.сунет!!!</h1>
+    <p><i>(Рекомендую включить впн иначе админы найдут вас и будут вычислять ваш адрес по отключениям света)</i></p>
+
+    <fieldset>
+        <legend>Настройки сканирования</legend> <!-- смотрите шо я недавно нашел ляпота не правда ли -->
+        
+        <label>Домен:</label>
+        <input type="text" id="domainInput" value="catwar.su"><br><br>
+
+        <label>Задержка (в мс):</label>
+        <input type="number" id="delayInput" value="500" min="0"><br><br>
+
+        <label>Что ищем?</label><br>
+        <select id="scanType">
+            <option value="cw3/cats/0/costume/{id}.png">Костюмы (.png)</option>
+            <option value="cw3/things/{id}.png">Предметы (.png)</option>
+            <option value="achievement/{id}.png">Достижения (.png)</option>
+            <option value="cw3/spacoj/{id}.jpg">Фоны (.jpg)</option>
+            <option value="cw3/sky/{id}.png">Небо (.png)</option>
+            <option value="medal/{id}.png">Медали (.png)</option>
+            <option value="cw3/actions/{id}.png">Действия (.png)</option>
+            <option value="cw3/odoroj/{id}.png">Запахи (.png)</option>
+            <option value="cw3/moves/{id}.png">Переходы (.png)</option>
+            <option value="cat">Персонажи (/cat)</option>
+        </select><br>
+        <i>(потом сделаю чекбоксы а пока вот так)</i><br><br>
+        
+
+        <label>от:</label>
+        <input type="number" id="startId" value="1" min="0" placeholder="ID" required>
+        
+        <label>до:</label>
+        <input type="number" id="endId" value="20" min="1" placeholder="ID" required><br><br>
+
+        <button id="startBtn" onclick="startScan()">ГУЛЯЙ РВАНИНА!!!!11</button>
+        <button id="stopBtn" onclick="stopScan()" disabled>Остановить</button>
+    </fieldset>
+
+    <h2>Результаты:</h2>
+    <p>Проверено: <span id="checked">0</span> | Найдено: <span id="found">0</span></p>
+    <hr>
+    <div id="resultsContainer">
+        </div>
+
+    <script>
+        let isScanning = false;
+        let checked = 0;
+        let found = 0;
+
+        const CORS_PROXY = 'https://corsproxy.io/?'; 
+
+        function stopScan() {
+            isScanning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        async function startScan() {
+            if (isScanning) return;
+
+            const start = parseInt(document.getElementById('startId').value);
+            const end = parseInt(document.getElementById('endId').value);
+            const delay = parseInt(document.getElementById('delayInput').value);
+            const domain = document.getElementById('domainInput').value;
+            const scanType = document.getElementById('scanType').value;
+            
+            if (start > end || !domain) {
+                alert("нет что то тут не так перепроверяй епт");
+                return;
+            }
+
+            isScanning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            document.getElementById('resultsContainer').innerHTML = '';
+            checked = 0;
+            found = 0;
+            updateCounters();
+
+            for (let id = start; id <= end; id++) {
+                if (!isScanning) break;
+
+                if (scanType === 'cat') {
+                    await scanCharacter(domain, id);
+                } else {
+                    await scanImage(domain, id, scanType);
+                }
+
+                checked++;
+                updateCounters();
+
+                if (delay > 0 && id < end && isScanning) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            stopScan();
+            if(isScanning !== false) {
+                alert("все отсканировал братуха");
+            }
+        }
+
+        async function scanImage(domain, id, pathTemplate) {
+            const pathUrl = pathTemplate.replace('{id}', id);
+            const targetUrl = `https://${domain}/${pathUrl}`;
+            const proxiedUrl = CORS_PROXY + encodeURIComponent(targetUrl);
+
+            try {
+                const response = await fetch(proxiedUrl, { method: 'GET' });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    
+                    if (blob.size !== 305 && blob.type.startsWith('image/')) {
+                        found++;
+                        
+                        const blobUrl = URL.createObjectURL(blob);
+                        const lastMod = response.headers.get('Last-Modified') || 'Неизвестно';
+                        const sizeKB = (blob.size / 1024).toFixed(2);
+
+                        const html = `
+                            <div>
+                                <b>ID: ${id}</b><br>
+                                <a href="${targetUrl}" target="_blank">
+                                    <img src="${blobUrl}" width="150" alt="Изображение ${id}">
+                                </a><br>
+                                Размер: ${sizeKB} KB<br>
+                                Дата: ${lastMod}
+                            </div>
+                            <hr>
+                        `;
+                        document.getElementById('resultsContainer').insertAdjacentHTML('beforeend', html);
+                    }
+                }
+            } catch (e) {
+                console.error(`Ошибка при запросе картинки ${id}:`, e);
+            }
+        }
+
+        async function scanCharacter(domain, id) {
+            const targetUrl = `https://${domain}/cat${id}`;
+            const proxiedUrl = CORS_PROXY + encodeURIComponent(targetUrl);
+
+            try {
+                const response = await fetch(proxiedUrl, { 
+                    method: 'GET',
+                    headers: { 'Accept': 'text/html' }
+                });
+                
+                if (response.ok) {
+                    const htmlText = await response.text();
+                    
+                    if (htmlText.includes('Нет такого игрока') || htmlText.includes('Ошибка!')) {
+                        return;
+                    }
+
+                    found++;
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+
+                    let catName = doc.querySelector('big')?.innerText;
+                    
+                    let avatarImg = doc.querySelector('img.avatar')?.src || '';
+                    if (avatarImg && avatarImg.startsWith(CORS_PROXY)) {
+                        avatarImg = decodeURIComponent(avatarImg.replace(CORS_PROXY, ''));
+                    } else if (avatarImg && avatarImg.startsWith('/')) {
+                        avatarImg = `https://${domain}${avatarImg}`;
+                    }
+
+                    // по колхозянски ищем табличку где все данные
+                    let statsHtml = '<ul>';
+                    const idIcon = doc.querySelector('#id_icon');
+                    
+                    if (idIcon) {
+                        const table = idIcon.closest('table');
+                        const rows = table.querySelectorAll('tr');
+                        
+                        rows.forEach(row => {
+                            const icon = row.querySelector('td:first-child img');
+                            const valueObj = row.querySelector('td:nth-child(2) b') || row.querySelector('td:nth-child(2)');
+                            
+                            if (icon && valueObj) {
+                                let label = icon.title;
+                                if (!label) {
+                                    if (icon.id === 'id_icon') label = 'ID';
+                                    else if (icon.id === 'age_icon') label = 'Возраст';
+                                    else if (icon.id === 'act_icon') label = 'Активность';
+                                    else label = 'Параметр'; //блять а схуяли у племени и бу нет айдишек
+                                }
+                                statsHtml += `<li><b>${label}:</b> ${valueObj.innerText.trim()}</li>`;
+                            }
+                        });
+                    } else {
+                        statsHtml += '<li><i>Таблица с данными (почему-то) не найдена :/ </i></li>';
+                    }
+                    statsHtml += '</ul>';
+
+                    const resultHtml = `
+                        <div>
+                            <b>Имя: ${catName}</b><br>
+                            ${avatarImg ? `<a href="${targetUrl}" target="_blank"><img src="${avatarImg}" width="100" alt="Аватар"></a><br>` : ''}
+                            <a href="${targetUrl}" target="_blank">Ссылка на профиль</a><br>
+                            ${statsHtml}
+                        </div>
+                        <hr>
+                    `;
+                    document.getElementById('resultsContainer').insertAdjacentHTML('beforeend', resultHtml);
+                }
+            } catch (e) {
+                console.error(`Ошибка при поиске персонажа: ${id}:`, e);
+            }
+        }
+
+        function updateCounters() {
+            document.getElementById('checked').innerText = checked;
+            document.getElementById('found').innerText = found;
+        }
+    </script>
+</body>
+</html>
