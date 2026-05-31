@@ -54,7 +54,7 @@
         let checked = 0;
         let found = 0;
 
-        const CORS_PROXY = 'https://corsproxy.io/?'; 
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url='; 
 
         function stopScan() {
             isScanning = false;
@@ -168,11 +168,17 @@
 
                     let catName = doc.querySelector('big')?.innerText;
                     
-                    let avatarImg = doc.querySelector('img.avatar')?.src || '';
-                    if (avatarImg && avatarImg.startsWith(CORS_PROXY)) {
-                        avatarImg = decodeURIComponent(avatarImg.replace(CORS_PROXY, ''));
-                    } else if (avatarImg && avatarImg.startsWith('/')) {
-                        avatarImg = `https://${domain}${avatarImg}`;
+                    let avatarSrc = doc.querySelector('img.avatar')?.getAttribute('src') || '';
+                    let avatarImg = '';
+                    
+                    if (avatarSrc) {
+                        if (avatarSrc.startsWith('/')) {
+                            avatarImg = `https://${domain}${avatarSrc}`;
+                        } else if (!avatarSrc.startsWith('http')) {
+                            avatarImg = `https://${domain}/${avatarSrc}`;
+                        } else {
+                            avatarImg = avatarSrc;
+                        }
                     }
 
                     // по колхозянски ищем табличку где все данные
